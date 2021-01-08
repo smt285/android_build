@@ -267,8 +267,8 @@ SHRP_INC_IN_REC_EXTERNAL_ADDON_5=$(echo "$ARGS" | cut -d "," -f 27)
 SHRP_INC_IN_REC_EXTERNAL_ADDON_6=$(echo "$ARGS" | cut -d "," -f 28)
 INC_IN_REC_MAGISK=$(echo "$ARGS" | cut -d "," -f 29)
 
-SHRP_VERSION=3.69
-SHRP_STATUS=beta
+SHRP_VERSION=3.0
+SHRP_STATUS=stable
 
 SHRP_VENDOR=vendor/shrp
 MAGISKBOOT=$SHRP_VENDOR/extras/magiskboot
