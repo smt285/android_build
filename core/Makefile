@@ -1091,20 +1091,21 @@ define build-recoveryramdisk
 
 ### SHRP - STARTING BUILD ###
     mkdir -p $(SHRP_BUILD_DIR)
-    test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_MAINTAINER) ' > $(SHRP_BUILD_DIR)/variables
-    test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_DEVICE_CODE) ' >> $(SHRP_BUILD_DIR)/variables
-    test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_OFFICIAL) ' >> $(SHRP_BUILD_DIR)/variables
-    test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_EXPRESS) ' >> $(SHRP_BUILD_DIR)/variables
-    test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_REC)' >> $(SHRP_BUILD_DIR)/variables
-    test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_AB) ' > $(SHRP_BUILD_DIR)/ab
-    test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_BUILD_DATE) ' > $(TARGET_RECOVERY_ROOT_OUT)/twres/version
-    test "$(PRODUCT_IDENT)" == "shrp" && cp vendor/shrp/extras/magiskbootnt $(TARGET_RECOVERY_ROOT_OUT)/sbin/
-    test "$(PRODUCT_IDENT)" == "shrp" && ls -la && bash $(SHRPSCRIPT)
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_MAINTAINER) ' > $(SHRP_BUILD_DIR)/variables
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_DEVICE_CODE) ' >> $(SHRP_BUILD_DIR)/variables
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_OFFICIAL) ' >> $(SHRP_BUILD_DIR)/variables
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_EXPRESS) ' >> $(SHRP_BUILD_DIR)/variables
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_REC)' >> $(SHRP_BUILD_DIR)/variables
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_AB) ' > $(SHRP_BUILD_DIR)/ab
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_BUILD_DATE) ' > $(TARGET_RECOVERY_ROOT_OUT)/twres/version
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && cp vendor/shrp/extras/magiskbootnt $(TARGET_RECOVERY_ROOT_OUT)/sbin/
+    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && bash $(SHRPSCRIPT)
     $(if $(filter true,$(SHRP_NOTCH)), $(if $(filter true,$(SHRP_DARK)), $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/ , $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/ ),$(if $(filter true,$(SHRP_DARK)), $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark/* $(TARGET_RECOVERY_ROOT_OUT)/twres/))
     $(if $(filter true,$(SHRP_ALT_REBOOT)), $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/extra-layouts/altPower/powerPanel.xml $(TARGET_RECOVERY_ROOT_OUT)/twres/)
+    $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark/* $(TARGET_RECOVERY_ROOT_OUT)/twres/
 ### SHRP - END BUILD ###
+
 #$(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/
-#$(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark/* $(TARGET_RECOVERY_ROOT_OUT)/twres/
 #$(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/
 
   $(BOARD_RECOVERY_IMAGE_PREPARE)
