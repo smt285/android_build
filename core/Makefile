@@ -1216,6 +1216,7 @@ recoveryimage: $(INSTALLED_RECOVERYIMAGE_TARGET) $(RECOVERY_RESOURCE_ZIP)
 ###SHRP###
 	test "$(PRODUCT_IDENT)" == "shrp" && bash vendor/shrp/shrp_final.sh
 ###SHRP###
+endif
 
 ifneq ($(BOARD_NAND_PAGE_SIZE),)
 mkyaffs2_extra_flags := -c $(BOARD_NAND_PAGE_SIZE)
