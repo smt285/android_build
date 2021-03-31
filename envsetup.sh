@@ -1701,7 +1701,7 @@ if [ "x$SHELL" != "x/bin/bash" ]; then
             ;;
     esac
     return
-}
+fi
 
 
 if ! __detect_shell > /dev/null; then
