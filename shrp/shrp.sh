@@ -1,6 +1,6 @@
-# !/bin/bash
+#!/bin/bash
 ##########################################################################
-#Copyright 2019 SKYHAWK RECOVERY PROJECT
+#Copyright 2019 - 2020 SKYHAWK RECOVERY PROJECT
 #
 #Licensed under the Apache License, Version 2.0 (the "License");
 #you may not use this file except in compliance with the License.
@@ -18,46 +18,43 @@
 # Get current working dir
 #
 dir="$(pwd)"
+
+#initializing helper function
+. "${dir}"/build/shrp/shrpEnv.sh
+
 #
 # Run shrp env variables from here
 #
-SHRP_BUILD_DIR=out/shrp
+DEFAULT_ADDON_LOC="${dir}"/$SHRP_VENDOR/extras
 
-SHRP_MAINTAINER=$(sed -n '1p' "$(pwd)/${SHRP_BUILD_DIR}/variables")
-SHRP_DEVICE=$(sed -n '2p' "$(pwd)/${SHRP_BUILD_DIR}/variables")
-SHRP_OFFICIAL=$(sed -n '3p' "$(pwd)/${SHRP_BUILD_DIR}/variables")
-SHRP_EXPRESS=$(sed -n '4p' "$(pwd)/${SHRP_BUILD_DIR}/variables")
-SHRP_REC=$(sed -n '5p' "$(pwd)/${SHRP_BUILD_DIR}/variables")
+#handle default Addons
+addDefaultAddonPre $(normalizeVar $(get_build_var INC_IN_REC_ADDON_1)) $DEFAULT_ADDON_LOC/s_oms.zip $(normalizeVar $(get_build_var SHRP_SKIP_DEFAULT_ADDON_1)) $(normalizeVar $(get_build_var SHRP_EXCLUDE_DEFAULT_ADDONS))
+addDefaultAddonPre $(normalizeVar $(get_build_var INC_IN_REC_ADDON_2)) $DEFAULT_ADDON_LOC/s_non_oms.zip $(normalizeVar $(get_build_var SHRP_SKIP_DEFAULT_ADDON_2)) $(normalizeVar $(get_build_var SHRP_EXCLUDE_DEFAULT_ADDONS))
+addDefaultAddonPre $(normalizeVar $(get_build_var INC_IN_REC_ADDON_3)) $DEFAULT_ADDON_LOC/rfp.zip $(normalizeVar $(get_build_var SHRP_SKIP_DEFAULT_ADDON_3)) $(normalizeVar $(get_build_var SHRP_EXCLUDE_DEFAULT_ADDONS))
+addDefaultAddonPre $(normalizeVar $(get_build_var INC_IN_REC_ADDON_4)) $DEFAULT_ADDON_LOC/c_fixed_encryption.zip $(normalizeVar $(get_build_var SHRP_SKIP_DEFAULT_ADDON_4)) $(normalizeVar $(get_build_var SHRP_EXCLUDE_DEFAULT_ADDONS))
+#handle External Addons
+addAddonPre $(normalizeVar $(get_build_var SHRP_INC_IN_REC_EXTERNAL_ADDON_1)) $(get_addon_confirm ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_1_FILENAME)) $(addon_skip ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_1_FILENAME))
+addAddonPre $(normalizeVar $(get_build_var SHRP_INC_IN_REC_EXTERNAL_ADDON_2)) $(get_addon_confirm ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_2_FILENAME)) $(addon_skip ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_2_FILENAME))
+addAddonPre $(normalizeVar $(get_build_var SHRP_INC_IN_REC_EXTERNAL_ADDON_3)) $(get_addon_confirm ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_3_FILENAME)) $(addon_skip ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_3_FILENAME))
+addAddonPre $(normalizeVar $(get_build_var SHRP_INC_IN_REC_EXTERNAL_ADDON_4)) $(get_addon_confirm ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_4_FILENAME)) $(addon_skip ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_4_FILENAME))
+addAddonPre $(normalizeVar $(get_build_var SHRP_INC_IN_REC_EXTERNAL_ADDON_5)) $(get_addon_confirm ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_5_FILENAME)) $(addon_skip ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_5_FILENAME))
+addAddonPre $(normalizeVar $(get_build_var SHRP_INC_IN_REC_EXTERNAL_ADDON_6)) $(get_addon_confirm ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_6_FILENAME)) $(addon_skip ${dir}/$EAP$(get_build_var SHRP_EXTERNAL_ADDON_6_FILENAME))
 
-cat > "${dir}"/${SHRP_BUILD_DIR}/shrp_info.json <<EOF
-[
-	{
-	"codeName": "$SHRP_DEVICE",
-	"buildNo": "$SHRP_BUILD_DATE",
-	"isOfficial": $SHRP_OFFICIAL,
-  	"has_express": $SHRP_EXPRESS,
-	"shrpVer": "2.3.2"
-	}
-]
-EOF
+#Saving Version Directly in out
+echo $SHRP_BUILD_DATE > $REC_OUT/twres/version
 
-cat > "${dir}"/${SHRP_BUILD_DIR}/updater-script <<EOF
-show_progress(1.000000, 0);
-ui_print("             ");
-ui_print("Skyhawk Recovery Project                  ");
-ui_print("|SHRP version - 2.3.2 Stable                ");
-ui_print("|Device - $SHRP_DEVICE");
-ui_print("|Maintainer - $SHRP_MAINTAINER");
-delete_recursive("/sdcard/SHRP");
-package_extract_dir("Files", "/sdcard/");
-set_progress(0.500000);
-package_extract_file("recovery.img", "$SHRP_REC");
-set_progress(0.700000);
-ui_print("                                                  ");
-ui_print("Contact Us,");
-ui_print(" + Website- http://shrp.team                        ");
-ui_print(" + Telegram Group - t.me/sky_hawk                 ");
-ui_print(" + Telegram Channel - t.me/shrp_official          ");
-set_progress(1.000000);
-ui_print("");
-EOF
+if [[ $SHRP_AB = true ]]; then
+    cp "${dir}"/vendor/shrp/magiskboot/magiskbootnt $REC_OUT/sbin/
+fi;
+
+if [[ $SHRP_DARK = true ]]; then
+cp -r "${dir}"/bootable/recovery/gui/theme/shrp_dark/* $REC_OUT/twres/
+fi;
+
+if [[ $SHRP_LITE = true ]]; then
+rm -rf $REC_OUT/twres/themeResources
+fi;
+
+if [[ $SHRP_ALT_REBOOT = true ]]; then
+cp -r "${dir}"/bootable/recovery/gui/theme/extra-layouts/altPower/* $REC_OUT/twres/
+fi;

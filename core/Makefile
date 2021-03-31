@@ -3,17 +3,8 @@
 # HACK: clear LOCAL_PATH from including last build target before calling
 # intermedites-dir-for
 LOCAL_PATH := $(BUILD_SYSTEM)
-
-SHRP_BUILD_DIR := out/shrp
-
-# Pick a reasonable string to use to identify files.
-ifneq "" "$(filter eng.%,$(BUILD_NUMBER))"
-  # BUILD_NUMBER has a timestamp in it, which means that
-  # it will change every time.  Pick a stable value.
-  FILE_NAME_TAG := eng.$(USER)
-else
-  FILE_NAME_TAG := $(BUILD_NUMBER)
-endif
+MAKE_ENV := $(shell echo '$(.VARIABLES)' | awk -v RS=' ' '/^[a-zA-Z0-9_]+$$/')
+SHELL_EXPORT := $(foreach v,$(MAKE_ENV),$(v)='$($(v))')
 
 # -----------------------------------------------------------------
 # Define rules to copy PRODUCT_COPY_FILES defined by the product.
@@ -23,6 +14,19 @@ endif
 # The filter part means "only eval the copy-one-file rule if this
 # src:dest pair is the first one to match the same dest"
 #$(1): the src:dest pair
+#$(2): the dest
+###SHRP###
+ifneq ($(BUILD_WITH_COLORS),0)
+  CL_RED="\033[31m"
+  CL_GRN="\033[32m"
+  CL_YLW="\033[33m"
+  CL_BLU="\033[34m"
+  CL_MAG="\033[35m"
+  CL_CYN="\033[36m"
+  CL_RST="\033[0m"
+endif
+###/SHRP###
+
 define check-product-copy-files
 $(if $(filter %.apk, $(call word-colon, 2, $(1))),$(info \
     Prebuilt apk found in PRODUCT_COPY_FILES: $(1), use BUILD_PREBUILT instead!))
@@ -1030,11 +1034,6 @@ ifeq ($(strip $(BOARD_KERNEL_SEPARATED_DT)),true)
   RECOVERYIMAGE_EXTRA_DEPS    := $(INSTALLED_DTIMAGE_TARGET)
 endif
 
-SHRPSCRIPT := $(TOPDIR)build/shrp/shrp.sh
-ifeq ($(SHRP_AB),true)
-  SHRPSCRIPT := $(TOPDIR)build/shrp/shrp_ab.sh
-endif
-
 # Keys authorized to sign OTA packages this build will accept.  The
 # build always uses dev-keys for this; release packaging tools will
 # substitute other keys for this one.
@@ -1090,24 +1089,8 @@ define build-recoveryramdisk
           > $(TARGET_RECOVERY_ROOT_OUT)/default.prop
 
 ### SHRP - STARTING BUILD ###
-    mkdir -p $(SHRP_BUILD_DIR)
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_MAINTAINER) ' > $(SHRP_BUILD_DIR)/variables
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_DEVICE_CODE) ' >> $(SHRP_BUILD_DIR)/variables
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_OFFICIAL) ' >> $(SHRP_BUILD_DIR)/variables
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_EXPRESS) ' >> $(SHRP_BUILD_DIR)/variables
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_REC)' >> $(SHRP_BUILD_DIR)/variables
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_AB) ' > $(SHRP_BUILD_DIR)/ab
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && echo '$(SHRP_BUILD_DATE) ' > $(TARGET_RECOVERY_ROOT_OUT)/twres/version
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && cp vendor/shrp/extras/magiskbootnt $(TARGET_RECOVERY_ROOT_OUT)/sbin/
-    $(hide) test "$(PRODUCT_IDENT)" == "shrp" && bash $(SHRPSCRIPT)
-    $(if $(filter true,$(SHRP_NOTCH)), $(if $(filter true,$(SHRP_DARK)), $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/ , $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/ ),$(if $(filter true,$(SHRP_DARK)), $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark/* $(TARGET_RECOVERY_ROOT_OUT)/twres/))
-    $(if $(filter true,$(SHRP_ALT_REBOOT)), $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/extra-layouts/altPower/powerPanel.xml $(TARGET_RECOVERY_ROOT_OUT)/twres/)
-    $(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark/* $(TARGET_RECOVERY_ROOT_OUT)/twres/
+	$(hide) test "$(PRODUCT_IDENT)" == "shrp" && bash $(TOPDIR)build/shrp/shrp.sh
 ### SHRP - END BUILD ###
-
-#$(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/
-#$(hide) cp -r $(TOPDIR)bootable/recovery/gui/theme/shrp_dark_notch/* $(TARGET_RECOVERY_ROOT_OUT)/twres/
-
   $(BOARD_RECOVERY_IMAGE_PREPARE)
   $(if $(filter true,$(BOARD_BUILD_SYSTEM_ROOT_IMAGE)), \
     $(hide) mkdir -p $(TARGET_RECOVERY_ROOT_OUT)/system_root; \
@@ -1229,21 +1212,10 @@ endif
 .PHONY: recoveryimage
 ifneq ($(filter shrp, $(PRODUCT_IDENT)),)
 recoveryimage: $(INSTALLED_RECOVERYIMAGE_TARGET) $(RECOVERY_RESOURCE_ZIP)
-	$(BASH) $(SHRP_SCRIPT)
-	@echo -e ${CL_CYN} ""
-	@echo -e ${CL_CYN} "                                                  "
-	@echo -e ${CL_CYN} "   __ __ __  _ __ _  __ _                         "
-	@echo -e ${CL_CYN} "  / _ _// / / / __ \/ __ \                        "
-	@echo -e ${CL_CYN} "  \__ \/ /_/ / /_/ / /_/ /                        "
-	@echo -e ${CL_CYN} " ___/ / __  / _, _/ ____/                         "
-	@echo -e ${CL_CYN} "/__ _/_/ /_/_/ |_/_/                              "
-	@echo -e ${CL_CYN} ""
-	@echo -e ${CL_CYN} ""
-	@echo -e ${CL_CYN} "" ${CL_CYN}
-	@echo -e ${CL_GRN} "-----------SHRP Recovery Build Complete-----------"${CL_GRN}
-else
 recoveryimage: $(INSTALLED_RECOVERYIMAGE_TARGET) $(RECOVERY_RESOURCE_ZIP)
-endif
+###SHRP###
+	test "$(PRODUCT_IDENT)" == "shrp" && bash vendor/shrp/shrp_final.sh
+###SHRP###
 
 ifneq ($(BOARD_NAND_PAGE_SIZE),)
 mkyaffs2_extra_flags := -c $(BOARD_NAND_PAGE_SIZE)

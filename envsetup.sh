@@ -1676,7 +1676,18 @@ function make()
     mk_timer $(get_make_command) "$@"
 }
 
-function __detect_shell() {
+#SHRP PY Addition
+function shrp()
+{
+    python3 $(gettop)/build/shrp/shrp.py
+}
+function SHRP()
+{
+    python3 $(gettop)/build/shrp/shrp.py
+}
+
+
+if [ "x$SHELL" != "x/bin/bash" ]; then
     case `ps -o command -p $$` in
         *bash*)
             echo bash
