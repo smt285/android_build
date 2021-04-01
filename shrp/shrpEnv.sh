@@ -23,7 +23,7 @@ ARGS=$(echo "$@"|tr -d " ")
 #kanged from envsetup.sh
 function gettop
 {
-    local TOPFILE=build/make/core/envsetup.mk
+    local TOPFILE=build/core/envsetup.mk
     if [ -n "$TOP" -a -f "$TOP/$TOPFILE" ] ; then
         # The following circumlocution ensures we remove symlinks from TOP.
         (cd $TOP; PWD= /bin/pwd)
